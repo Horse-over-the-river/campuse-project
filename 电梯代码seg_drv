@@ -1,0 +1,62 @@
+`timescale 1ns / 1ps
+
+module seg_drv(
+    input clk,
+    input [23:0] bcd_data_in,
+    output reg [7:0] seg_data_out,
+    output reg [5:0] seg_channel_out
+    );
+
+reg [15:0] cnt;
+
+always @(posedge clk) begin
+    cnt<=cnt+1'b1;
+end
+
+reg [3:0] num;
+
+always @(*)begin
+    case(num)
+        4'b0000: seg_data_out=8'b01100000;
+        4'b0001: seg_data_out=8'b11011010;
+        4'b0010: seg_data_out=8'b10000000;//go up
+        4'b0011: seg_data_out=8'b00000010;//stand by
+        4'b0100: seg_data_out=8'b00010000;//go down
+        default: seg_data_out=8'b00000000;
+    endcase
+end
+
+always @(*) begin
+    case(cnt[2:0])
+        3'b000: begin
+            seg_channel_out=6'b111110;
+            num=bcd_data_in[3:0];
+        end
+        3'b001: begin        
+            seg_channel_out=6'b111101;
+            num=bcd_data_in[7:4];
+        end
+        3'b010: begin
+            seg_channel_out=6'b111011;
+            num=bcd_data_in[11:8];
+        end
+        3'b011: begin
+            seg_channel_out=6'b110111;
+            num=bcd_data_in[15:12];
+        end        
+        3'b100: begin
+            seg_channel_out=6'b101111;
+            num=bcd_data_in[19:16];
+        end        
+        3'b101: begin
+            seg_channel_out=6'b011111;
+            num=bcd_data_in[23:20];
+        end
+        default: begin
+            seg_channel_out=6'b111111;
+            num=bcd_data_in[3:0];
+        end
+    endcase
+end
+
+endmodule
